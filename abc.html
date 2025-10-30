@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Belajar Huruf A–Z</title>
+<style>
+  :root {
+    --bg1: #0b132b;
+    --bg2: #1c2541;
+    --card: #3a506b;
+    --accent: #5bc0be;
+    --text: #ffffff;
+  }
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Poppins", Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bg1), var(--bg2));
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    margin: 0.2em 0;
+  }
+
+  p {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    opacity: 0.85;
+  }
+
+  .grid {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  /* Responsif */
+  @media (max-width: 400px) {
+    .grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (min-width: 401px) and (max-width: 700px) {
+    .grid { grid-template-columns: repeat(5, 1fr); }
+  }
+  @media (min-width: 701px) {
+    .grid { grid-template-columns: repeat(6, 1fr); }
+  }
+
+  button {
+    aspect-ratio: 1 / 1;
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-weight: 700;
+    border: none;
+    border-radius: 16px;
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.12s ease, background 0.2s ease;
+    cursor: pointer;
+  }
+
+  button:active {
+    transform: scale(0.94);
+    background: var(--accent);
+    color: #000;
+  }
+
+  footer {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    opacity: 0.75;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>📚 Belajar Huruf A–Z</h1>
+    <p>Ketuk huruf untuk mendengar suaranya</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>Suara perempuan Bahasa Indonesia (jika tersedia di browser)</footer>
+
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  // Buat tombol huruf A–Z
+  huruf.forEach(h => {
+    const btn = document.createElement('button');
+    btn.textContent = h;
+    btn.addEventListener('click', () => speak(h));
+    grid.appendChild(btn);
+  });
+
+  let voices = [];
+  function loadVoices(){
+    voices = window.speechSynthesis.getVoices() || [];
+  }
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+
+  function getFemaleIndonesianVoice(){
+    // Prioritaskan suara perempuan Bahasa Indonesia
+    return voices.find(v => /id-|indonesian/i.test(v.lang) && /female|google|wavenet|damayanti|perempuan/i.test(v.name)) ||
+           voices.find(v => /id-|indonesian/i.test(v.lang)) ||
+           voices.find(v => /female|woman/i.test(v.name)) ||
+           voices.find(v => /en-|english/i.test(v.lang)) || null;
+  }
+
+  function speak(h){
+    const u = new SpeechSynthesisUtterance(h);
+    const v = getFemaleIndonesianVoice();
+    if (v) u.voice = v;
+    u.lang = (v && v.lang) || "id-ID";
+    u.rate = 0.9;  // lebih pelan & lembut
+    u.pitch = 1.2; // sedikit lebih tinggi (karakter perempuan)
+    u.volume = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+})();
+</script>
+</body>
+</html>
