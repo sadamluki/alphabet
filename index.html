@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Belajar Huruf A–Z</title>
+<title>Belajar Huruf & Binatang</title>
 <style>
   :root {
     --bg1: #0b132b;
@@ -36,9 +36,59 @@
     margin: 0.2em 0;
   }
 
-  p {
-    font-size: clamp(0.9rem, 2vw, 1rem);
-    opacity: 0.85;
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--card);
+    padding: 8px 15px;
+    border-radius: 30px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: 0.3s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  input:checked + .slider {
+    background-color: var(--accent);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
   }
 
   .grid {
@@ -48,7 +98,6 @@
     max-width: 800px;
   }
 
-  /* Responsif */
   @media (max-width: 400px) {
     .grid { grid-template-columns: repeat(4, 1fr); }
   }
@@ -61,12 +110,15 @@
 
   button {
     aspect-ratio: 1 / 1;
-    font-size: clamp(1.8rem, 6vw, 3rem);
-    font-weight: 700;
+    font-size: clamp(1.5rem, 6vw, 3rem);
+    font-weight: 600;
     border: none;
     border-radius: 16px;
     background: var(--card);
     color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     transition: transform 0.12s ease, background 0.2s ease;
     cursor: pointer;
@@ -88,8 +140,16 @@
 </head>
 <body>
   <header>
-    <h1>📚 Belajar Huruf A–Z</h1>
-    <p>Ketuk huruf untuk mendengar suaranya</p>
+    <h1>📚 Belajar Huruf & Binatang</h1>
+    <div class="toggle-container">
+      <span>Huruf</span>
+      <label class="switch">
+        <input type="checkbox" id="modeSwitch">
+        <span class="slider"></span>
+      </label>
+      <span>Binatang</span>
+    </div>
+    <p>Ketuk untuk mendengar suaranya</p>
   </header>
 
   <div class="grid" id="grid"></div>
@@ -99,16 +159,59 @@
 <script>
 (function(){
   const grid = document.getElementById('grid');
-  const huruf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const switchBtn = document.getElementById('modeSwitch');
 
-  // Buat tombol huruf A–Z
-  huruf.forEach(h => {
-    const btn = document.createElement('button');
-    btn.textContent = h;
-    btn.addEventListener('click', () => speak(h));
-    grid.appendChild(btn);
-  });
+  const animals = [
+    { e: "🐔", n: "Ayam" },
+    { e: "🐻", n: "Beruang" },
+    { e: "🐱", n: "Kucing" },
+    { e: "🐶", n: "Anjing" },
+    { e: "🐘", n: "Gajah" },
+    { e: "🐸", n: "Katak" },
+    { e: "🐐", n: "Kambing" },
+    { e: "🐹", n: "Hamster" },
+    { e: "🦎", n: "Iguana" },
+    { e: "🦒", n: "Jerapah" },
+    { e: "🐨", n: "Koala" },
+    { e: "🦁", n: "Singa" },
+    { e: "🐵", n: "Monyet" },
+    { e: "🐮", n: "Sapi" },
+    { e: "🦉", n: "Burung Hantu" },
+    { e: "🐧", n: "Pinguin" },
+    { e: "🦆", n: "Bebek" },
+    { e: "🐰", n: "Kelinci" },
+    { e: "🐍", n: "Ular" },
+    { e: "🐯", n: "Harimau" },
+    { e: "🦄", n: "Unicorn" },
+    { e: "🦇", n: "Kelelawar" },
+    { e: "🐺", n: "Serigala" },
+    { e: "🦜", n: "Burung" },
+    { e: "🦋", n: "Kupu-kupu" },
+    { e: "🦓", n: "Zebra" },
+  ];
 
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  function renderGrid(showAnimals=false) {
+    grid.innerHTML = "";
+    if (showAnimals) {
+      animals.forEach(item => {
+        const btn = document.createElement('button');
+        btn.textContent = item.e;
+        btn.addEventListener('click', () => speak(item.n));
+        grid.appendChild(btn);
+      });
+    } else {
+      letters.forEach(h => {
+        const btn = document.createElement('button');
+        btn.textContent = h;
+        btn.addEventListener('click', () => speak(h));
+        grid.appendChild(btn);
+      });
+    }
+  }
+
+  // Suara setup
   let voices = [];
   function loadVoices(){
     voices = window.speechSynthesis.getVoices() || [];
@@ -117,24 +220,31 @@
   window.speechSynthesis.onvoiceschanged = loadVoices;
 
   function getFemaleIndonesianVoice(){
-    // Prioritaskan suara perempuan Bahasa Indonesia
     return voices.find(v => /id-|indonesian/i.test(v.lang) && /female|google|wavenet|damayanti|perempuan/i.test(v.name)) ||
            voices.find(v => /id-|indonesian/i.test(v.lang)) ||
            voices.find(v => /female|woman/i.test(v.name)) ||
            voices.find(v => /en-|english/i.test(v.lang)) || null;
   }
 
-  function speak(h){
-    const u = new SpeechSynthesisUtterance(h);
+  function speak(text){
+    const u = new SpeechSynthesisUtterance(text);
     const v = getFemaleIndonesianVoice();
     if (v) u.voice = v;
     u.lang = (v && v.lang) || "id-ID";
-    u.rate = 0.9;  // lebih pelan & lembut
-    u.pitch = 1.2; // sedikit lebih tinggi (karakter perempuan)
+    u.rate = 0.9;
+    u.pitch = 1.2;
     u.volume = 1;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   }
+
+  // Toggle Mode
+  switchBtn.addEventListener('change', (e)=>{
+    renderGrid(e.target.checked);
+  });
+
+  // Default tampilan huruf
+  renderGrid(false);
 })();
 </script>
 </body>
